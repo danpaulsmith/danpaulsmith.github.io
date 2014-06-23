@@ -8,6 +8,13 @@
 */
 (function($) {
     
+    $('h2 a.show-source').click(function(){
+        var section = $(this).closest('section');
+        $.ajax({url:$(this).attr('rel')}).done(function(data){
+            section.find('.source').html(data).slideDown();
+        });
+    });
+
     deferred();
 
     prototypes();
@@ -113,17 +120,15 @@ function deferred() {
         var step2 = $.Deferred().done(function() { return step1 });
         var step3 = $.Deferred().done(function() { return step2 });
 
-        step1.done(function() { section3.append("Step 1") });
-        step2.done(function() { section3.append("Step 2") });
-        step3.done(function() { section3.append("All done") });
+        step1.done(function() { section3.append("Step 1 <br />") });
+        step2.done(function() { section3.append("Step 2 <br />") });
+        step3.done(function() { section3.append("Step 3 <br />") });
         //now the 3 alerts will also be fired in order of 1,2,3
         //no matter which Deferred gets resolved first.
 
         step2.resolve();
         step3.resolve();
-        setTimeout(function(){
-            step1.resolve();
-        }, 1000);   
+        step1.resolve();   
 
     };
 

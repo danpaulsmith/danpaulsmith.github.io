@@ -26,3 +26,6 @@ section h2 {
 .output .error {
     color: red;
 }
+div.source {
+    display: none;
+}
