@@ -8,12 +8,14 @@
 */
 (function($) {
     
-    $('h2 a.show-source').click(function(){
-        var section = $(this).closest('section');
-        $.ajax({url:$(this).attr('rel')}).done(function(data){
-            section.find('.source').html(data).slideDown();
-        });
+    $('h2 a.show-source:not(.expanded)').click(function(){
+        var section = $(this).closest('section').find('.source').slideDown();
+        $(this).addClass('expanded');
     });
+    $('h2 a.show-source.expanded').click(function(){
+        var section = $(this).closest('section').find('.source').slideUp();
+        $(this).removeClass('expanded');        
+    })
 
     deferred();
 
