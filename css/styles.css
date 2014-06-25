@@ -4,25 +4,39 @@ body {
     padding-top: 70px;
 }
 section {
-	background: #FFFFFF;
-	margin-bottom: 25px;
-	padding: 25px;
+  background: none repeat scroll 0 0 #FFFFFF;
+  margin-bottom: 10px;
+  padding: 25px 10px 1px;
+}
+section > * {
+  display: none;
+}
+section.open > * {
+  display: block;
 }
 section h2 {
-    background: none repeat scroll 0 0 #DFE8F2;
-    font-size: 20px;
-    margin: -25px -25px 20px;
-    padding: 10px;
+  background: none repeat scroll 0 0 #DFE8F2;
+  cursor: pointer;
+  display: block;
+  font-size: 20px;
+  margin: -25px -10px 0;
+  padding: 10px;
+}
+section h2:hover {
+    background: none repeat scroll 0 0 #FFF8F2;   
+}
+section p.notes {
+  background: none repeat scroll 0 0 #FFFFEA;
+  margin: 10px 0;
+  padding: 10px;
 }
 .output {
   background: none repeat scroll 0 0 #000000;
-  border-bottom: 1px solid #CCCCCC;
   color: #5FFF68;
   font-family: Lucida Console;
   margin-bottom: 10px;
   padding: 10px;
 }
-
 .output .error {
     color: red;
 }

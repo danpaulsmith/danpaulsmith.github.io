@@ -8,6 +8,17 @@
 */
 (function($) {
     
+    $('h2').click(function(){
+        var section = $(this).parent();
+        if(section.hasClass('open')){
+            section.removeClass('open');
+            section.find('.output').empty();
+        } else {
+            section.addClass('open');
+            eval(section.attr('id'))();            
+        }
+    });
+    /*
     $('h2 a.show-source:not(.expanded)').click(function(){
         var section = $(this).closest('section').find('.source').slideDown();
         $(this).addClass('expanded');
@@ -16,12 +27,67 @@
         var section = $(this).closest('section').find('.source').slideUp();
         $(this).removeClass('expanded');        
     })
+    */
 
-    deferred();
+    
 
-    prototypes();
+    //prototypes();
 
 })(jQuery);
+
+function prototypes() {
+
+	var section = $('#prototypes .output');
+ 
+    function Car(name){
+        this.name = name;
+        this.speed = 50;
+        this.features = {};
+    }
+    Car.prototype.drive = function(){
+        section.append("The "+this.name+" is driving at "+this.speed+" miles an hour"+(this.features.turbo?" with turbo":"")+""+(this.features.sunroof?" and the sunroof open":"")+". <br />");
+    };
+    Car.prototype.stop = function(){
+        section.append("The "+this.name+" has stopped. <br />");        
+    }
+
+    // Create sub-class and extend base class.
+    SuperCar.prototype = new Car();
+    SuperCar.prototype.constructor = SuperCar;
+     
+    function SuperCar(name){
+        // Call super constructor to copy all properties to the 
+        // subclass instance
+        Car.call(this, name);
+        this.name = name;
+        this.speed = 300;
+        this.features.turbo = true;
+    }
+
+    car1 = new Car('skoda');
+    car1.features.sunroof = true;
+    
+    car2 = new SuperCar( "porsche" );
+    car2.features.turbo = false;        // this doesn't work unless we use Car.call(this) inside SuperCar constructor
+    
+    car3 = new SuperCar( "ferrari" );
+    car3.speed = 350;
+       
+    car1.drive();
+    car2.drive();
+    car3.drive();   
+
+    car1.stop();
+    car2.stop();
+    car3.stop(); 
+
+    // Log updated property profiles.
+    console.log( car1 );
+    console.log( car2 );
+    console.log( car3 );
+
+}
+
 
 
 function deferred() {
@@ -42,42 +108,42 @@ function deferred() {
         var promise = process();
 
         promise.always(function(){
-        	section.append('always.');
+            section.append('always.');
         });
         promise.done(function(){
-        	section.append('done.');
+            section.append('done.');
         });
         promise.fail(function(){
-        	section.append('fail.');
+            section.append('fail.');
         });
         promise.progress(function(){
-        	section.append(".");
+            section.append(".");
         });
         promise.state(function(){
-        	section.append('state.');
+            section.append('state.');
         });
         promise.then(function(){
-        	section.append('then.');
+            section.append('then.');
         });
         
 
         function process() {
-        	
-        	var deferred = $.Deferred();
+            
+            var deferred = $.Deferred();
 
-        	//console.log(deferred.state());
+            //console.log(deferred.state());
 
-        	timer = setInterval(function(){
-        		deferred.notify();
-        	}, 1000);
+            timer = setInterval(function(){
+                deferred.notify();
+            }, 1000);
 
-        	setTimeout(function(){
-        		clearInterval(timer);
-        		deferred.resolve();
-        	}, 3000);
+            setTimeout(function(){
+                clearInterval(timer);
+                deferred.resolve();
+            }, 3000);
 
 
-        	return deferred;
+            return deferred;
         };
     }
 
@@ -85,33 +151,33 @@ function deferred() {
 
         var section2 = $('#deferred .output2');
 
-    	var loggedIn = $.Deferred();
-		var databaseReady = $.Deferred(); //deferred
+        var loggedIn = $.Deferred();
+        var databaseReady = $.Deferred(); //deferred
 
-		loggedIn.fail(function(){
-			section2.append('<span class="error">Couldn\'t log in </span><br />');
-		});
-		databaseReady.fail(function(){
-			section2.append('<span class="error">Couldn\'t init DB </span><br />');
-		});
+        loggedIn.fail(function(){
+            section2.append('<span class="error">Couldn\'t log in </span><br />');
+        });
+        databaseReady.fail(function(){
+            section2.append('<span class="error">Couldn\'t init DB </span><br />');
+        });
 
-		setTimeout(function(){
-    		section2.append('Logging in... <br />');
-    		loggedIn.resolve();
-    	}, 2000);
+        setTimeout(function(){
+            section2.append('Logging in... <br />');
+            loggedIn.resolve();
+        }, 2000);
 
-		setTimeout(function(){
-    		section2.append('DB initialising... <br />');
-    		databaseReady.reject();
-    	}, 5000);
+        setTimeout(function(){
+            section2.append('DB initialising... <br />');
+            databaseReady.reject();
+        }, 5000);
 
-		$.when(loggedIn, databaseReady).then(function() {
-			section2.append('Logged in and database ready. <br />');
-		}).always(function(){
-			section2.append('Clear app cache <br />');
-		}).fail(function(){
-			section2.append('<span class="error">Problem logging in and/or setting up database.</span> <br />')
-		});
+        $.when(loggedIn, databaseReady).then(function() {
+            section2.append('Logged in and database ready. <br />');
+        }).always(function(){
+            section2.append('Clear app cache <br />');
+        }).fail(function(){
+            section2.append('<span class="error">Problem logging in and/or setting up database.</span> <br />')
+        });
     }
 
     function steps() {
@@ -136,29 +202,3 @@ function deferred() {
 
 };
 
-function prototypes() {
-
-	var section = $('#prototype .output');
-
-	Car.prototype.speed = 50;
-	Car.prototype.drive = function(){
-		section.append(this.name+" is driving at "+this.speed+" miles an hour <br />");
-	};
-	function Car(name){
-		this.name = name;
-	};
-
-	SuperCar.prototype.speed = 200;	
-	SuperCar.prototype = new Car();
-	function SuperCar(name){
-		Car.call(this, name);
-	}
-
-
-	var car1 = new Car('car');
-	var car2 = new SuperCar('supercar');
-
-	car1.drive();
-	car2.drive();
-
-}
