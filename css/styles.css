@@ -1,6 +1,5 @@
 body {
     background: #EEEEEE;
-    min-height: 2000px;
     padding-top: 70px;
 }
 section {
@@ -32,13 +31,16 @@ section p.notes {
 }
 .output {
   background: none repeat scroll 0 0 #000000;
-  color: #5FFF68;
+  color: #5CE764;
   font-family: Lucida Console;
   margin-bottom: 10px;
   padding: 10px;
 }
 .output .error {
-    color: red;
+    color: #D55050;
+}
+.output .info {
+    color: #8CB3DC;
 }
 div.source {
     display: none;

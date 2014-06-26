@@ -7,7 +7,9 @@
 
 */
 (function($) {
-    
+
+    window.ajaxRequests = {};
+
     $('h2').click(function(){
         var section = $(this).parent();
         if(section.hasClass('open')){
@@ -98,12 +100,20 @@ function deferred() {
 
     steps();
 
+    ajax();
+
+    scopes();
+
+    multiAjax();
+
     function processor() {
 
-        var timer;
-
         var section = $('#deferred .output1');
-        section.html('waiting...');
+
+        section.append('Processor <br /><br />');
+        section.append('waiting...');
+
+        var timer;
 
         var promise = process();
 
@@ -149,48 +159,59 @@ function deferred() {
 
     function initApp(){
 
-        var section2 = $('#deferred .output2');
+        var section = $('#deferred .output2');
+        section.append('Init App <br /><br />');
 
         var loggedIn = $.Deferred();
         var databaseReady = $.Deferred(); //deferred
 
         loggedIn.fail(function(){
-            section2.append('<span class="error">Couldn\'t log in </span><br />');
+            section.append('<span class="error">(Fail) Couldn\'t log in </span><br />');
         });
         databaseReady.fail(function(){
-            section2.append('<span class="error">Couldn\'t init DB </span><br />');
+            section.append('<span class="error">(Fail) Couldn\'t init DB </span><br />');
         });
 
+        section.append('Logging in... <br />');
+        loggedIn.resolve();
+        
         setTimeout(function(){
-            section2.append('Logging in... <br />');
-            loggedIn.resolve();
-        }, 2000);
-
-        setTimeout(function(){
-            section2.append('DB initialising... <br />');
-            databaseReady.reject();
-        }, 5000);
+            section.append('DB initialising... <br />');
+            databaseReady.resolve();
+        }, 1500);
 
         $.when(loggedIn, databaseReady).then(function() {
-            section2.append('Logged in and database ready. <br />');
+            section.append('(Then) Logged in and database ready - loading app...<br />');
         }).always(function(){
-            section2.append('Clear app cache <br />');
+            section.append('(Always) Browser session updated...<br />');
         }).fail(function(){
-            section2.append('<span class="error">Problem logging in and/or setting up database.</span> <br />')
+            section.append('<span class="error">(Fail) Problem logging in and/or setting up database.</span> <br />')
         });
     }
 
     function steps() {
 
-        var section3 = $('#deferred .output3');
+        var section = $('#deferred .output3');
+        section.append('Steps <br /><br />');
+
+        $.when(step1, step2, step3).then(function(){
+            section.append("All done.");
+        });
 
         var step1 = $.Deferred();
-        var step2 = $.Deferred().done(function() { return step1 });
-        var step3 = $.Deferred().done(function() { return step2 });
+        var step2 = $.Deferred();
+        var step3 = $.Deferred();
 
-        step1.done(function() { section3.append("Step 1 <br />") });
-        step2.done(function() { section3.append("Step 2 <br />") });
-        step3.done(function() { section3.append("Step 3 <br />") });
+        step1.done(function() { 
+            section.append("Step 1 <br />") 
+        });
+        step2.done(function() { 
+            section.append("Step 2 <br />") 
+        });
+        step3.done(function() { 
+            section.append("Step 3 <br />") 
+        });
+
         //now the 3 alerts will also be fired in order of 1,2,3
         //no matter which Deferred gets resolved first.
 
@@ -198,7 +219,154 @@ function deferred() {
         step3.resolve();
         step1.resolve();   
 
-    };
+    }
+
+    /*
+        Cached ajax response and chained functions
+    */
+    function ajax() {
+
+        var section = $('#deferred .output4');
+        section.append('Cached AJAX requests <br /><br />');
+
+        console.log(ajaxRequests['date']);
+
+        if(!ajaxRequests['date']){
+            section.append("<span class='info'>Requesting date & time from server...</span><br />");
+            ajaxRequests['date'] = $.ajax({
+                url: 'http://date.jsontest.com/',
+                dataType: 'jsonp',
+                timeout: 15000
+            });
+        } else {
+            section.append("<span class='info'>Loading cached response for date & time</span><br />");
+        }
+
+        console.log(ajaxRequests);
+        
+        // Cached response available
+        ajaxRequests['date'].done(success).fail(error).always(complete);
+
+        function success(data){
+            section.append(data.time+"<br />"+data.date+"<br />");
+            section.append('Done <br />');
+        }
+        function error(){
+            section.append('Fail <br />');
+        }
+        function complete(){
+            section.append('Always <br />');
+        }                
+    }
+
+    function scopes(){
+
+        var section = $('#deferred .output5');
+        section.append('Scopes <br /><br />');
+
+        var myVar;
+        setTimeout(function(){
+            myVar = 'myVar';
+            section.append(myVar + " in the timeout - can be accessed <br />");
+            // end up writing lots of nested code in here
+        }, 2000);
+
+        // how to access this value if it is set in the future?
+        section.append(myVar + " - can\'t be accessed yet <br />");
+
+        // we can use a deferred object
+
+        var myVar2;
+        var setVal = function() {
+
+            // upon creation, deferred's status is 'pending'
+            var deferred = $.Deferred();
+
+            setTimeout(function(){
+                myVar2 = 'myVar2';
+                // once it resolves, any callbacks attached to it
+                // will fire
+                deferred.resolve();
+            }, 2000);
+
+            // return a limited version of the deferred
+            // The promise says "I promise to let setVal() know when 'deferred'  
+            // is resolved"
+            return deferred.promise();
+        }
+
+        setVal().done(function(){
+            section.append(myVar2 + " - setVal() done<br />");
+        }).fail(function(){
+            section.append(myVar2 + " - setVal() fail<br />");            
+        });
+
+        // alternatively can use then (success, fail)
+        setVal().then(function(){
+            section.append(myVar2 + " - setVal() done<br />");
+        }, function(){
+            section.append(myVar2 + " - setVal() fail<br />");            
+        });
+
+    }
+
+    function multiAjax(){
+
+        var section = $('#deferred .output6');
+        section.append('Multiple AJAX requests <br /><br />');
+        section.append('Requesting the time until the minute is up...<br />');
+
+        var timer;
+
+        $.getTime = function(){
+            
+            var dfd = $.Deferred();
+
+            timer = setInterval(function(){
+                $.ajax({
+                    url: 'http://date.jsontest.com/',
+                    dataType: 'jsonp',
+                    success: dfd.notify
+                });
+            }, 1000);
+
+            return dfd;
+        }
+
+        var request = $.getTime();
+
+        request.progress(function(data){
+            var seconds = parseInt(data.time.split(':')[2].split(' ')[0]);
+
+            if(seconds === 0){
+                clearInterval(timer);
+                request.resolve();
+            } else {
+                section.append(seconds+' ');
+            }
+
+        });
+
+        request.done(function(){
+            section.append('Done<br />');
+        })
+        .fail(function(){
+            section.append('Fail<br />');
+        })
+        .then(function(){
+            section.append('Then<br />');
+        });
+
+    }
 
 };
+
+
+
+
+
+
+
+
+
 
